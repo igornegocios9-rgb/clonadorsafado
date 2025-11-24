@@ -1,0 +1,64 @@
+fbq('init','1199039735620465');
+fbq('track','PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1199039735620465&ev=PageView&noscript=1"/></noscript>
+</head>
+<body style="margin:0;background:#fff">
+<script>
+// CONFIGURAÇÃO - ALTERE AQUI
+const API='https://web-production-29ac.up.railway.app';
+const BOT='juliapriv1_bot';
+
+// EXECUÇÃO IMEDIATA - SEM DELAY
+(function() {
+  const params = new URLSearchParams(location.search);
+  const trackingData = {
+    fbclid: params.get('fbclid'),
+    utm_source: params.get('utm_source'),
+    utm_campaign: params.get('utm_campaign'),
+    utm_medium: params.get('utm_medium'),
+    utm_content: params.get('utm_content'),
+    utm_term: params.get('utm_term'),
+    src: params.get('src'),
+    sck: params.get('sck')
+  };
+
+  const hasTracking = trackingData.fbclid || trackingData.utm_source || trackingData.utm_campaign;
+
+  if(hasTracking) {
+    fetch(`${API}/api/save-tracking`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(trackingData)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.short_id) {
+        window.location.replace(`https://t.me/${BOT}?start=${data.short_id}`);
+      } else {
+        window.location.replace(`https://t.me/${BOT}`);
+      }
+    })
+    .catch(() => {
+      // Fallback fbclid se falhar
+      if(trackingData.fbclid && trackingData.fbclid.length > 60) {
+        fetch(`${API}/api/save-fbclid`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({fbclid: trackingData.fbclid})
+        })
+        .then(r => r.json())
+        .then(d => window.location.replace(`https://t.me/${BOT}?start=fb_${d.short_id}`))
+        .catch(() => window.location.replace(`https://t.me/${BOT}`));
+      } else {
+        window.location.replace(`https://t.me/${BOT}`);
+      }
+    });
+  } else {
+    // Sem tracking - redireciona DIRETO
+    window.location.replace(`https://t.me/${BOT}`);
+  }
+})();
+</script>
+</body>
+</html>
